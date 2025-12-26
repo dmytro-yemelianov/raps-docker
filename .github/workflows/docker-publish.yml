@@ -1,4 +1,4 @@
-name: Build and Push to DockerHub
+name: Build and Push to DockerHub & GHCR
 
 on:
   # Check for new RAPS releases daily
@@ -19,11 +19,15 @@ on:
 
 env:
   DOCKERHUB_REPO: dmytroyemelianov/raps
+  GHCR_REPO: ghcr.io/dmytro-yemelianov/raps
   RAPS_REPO: dmytro-yemelianov/raps
 
 jobs:
   check-and-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     
     steps:
       - name: Checkout
@@ -73,12 +77,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Login to GitHub Container Registry
+        if: steps.check.outputs.exists != 'true' || github.event_name == 'workflow_dispatch'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Docker meta
         if: steps.check.outputs.exists != 'true' || github.event_name == 'workflow_dispatch'
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.DOCKERHUB_REPO }}
+          images: |
+            ${{ env.DOCKERHUB_REPO }}
+            ${{ env.GHCR_REPO }}
           tags: |
             type=raw,value=${{ steps.latest.outputs.version }}
             type=raw,value=latest
@@ -111,7 +125,8 @@ jobs:
           echo "## 🌼 RAPS Docker Build" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${{ steps.latest.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image:** \`${{ env.DOCKERHUB_REPO }}:${{ steps.latest.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **DockerHub:** \`${{ env.DOCKERHUB_REPO }}:${{ steps.latest.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **GHCR:** \`${{ env.GHCR_REPO }}:${{ steps.latest.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.check.outputs.exists }}" = "true" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             echo "- **Status:** ⏭️ Skipped (already exists)" >> $GITHUB_STEP_SUMMARY
           else

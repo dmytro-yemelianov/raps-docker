@@ -3,14 +3,18 @@
 Official Docker image for [RAPS](https://rapscli.xyz) — the Rust CLI for Autodesk Platform Services.
 
 [![DockerHub](https://img.shields.io/docker/v/dmytroyemelianov/raps?label=DockerHub&logo=docker)](https://hub.docker.com/r/dmytroyemelianov/raps)
+[![GHCR](https://img.shields.io/badge/GHCR-ghcr.io-blue?logo=github)](https://ghcr.io/dmytro-yemelianov/raps)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dmytroyemelianov/raps)](https://hub.docker.com/r/dmytroyemelianov/raps)
 [![Image Size](https://img.shields.io/docker/image-size/dmytroyemelianov/raps/latest)](https://hub.docker.com/r/dmytroyemelianov/raps)
 
 ## Quick Start
 
 ```bash
-# Pull the image
+# Pull from DockerHub
 docker pull dmytroyemelianov/raps
+
+# Or pull from GitHub Container Registry (GHCR)
+docker pull ghcr.io/dmytro-yemelianov/raps
 
 # Run RAPS
 docker run --rm dmytroyemelianov/raps --version
