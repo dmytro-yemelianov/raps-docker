@@ -1,0 +1,10 @@
+# Environment files with secrets
+.env
+
+# Local data
+data/
+pipelines/
+
+# Docker
+*.log
+

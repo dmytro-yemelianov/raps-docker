@@ -1,0 +1,49 @@
+version: '3.8'
+
+# 🌼 RAPS Docker Compose Configuration
+# https://hub.docker.com/r/dmytroyemelianov/raps
+
+services:
+  # Interactive RAPS shell
+  raps:
+    image: dmytroyemelianov/raps:latest
+    container_name: raps
+    environment:
+      - APS_CLIENT_ID=${APS_CLIENT_ID}
+      - APS_CLIENT_SECRET=${APS_CLIENT_SECRET}
+      - APS_REGION=${APS_REGION:-US}
+    volumes:
+      - ./data:/data
+      - ./pipelines:/pipelines
+    working_dir: /data
+    entrypoint: ["/bin/bash"]
+    stdin_open: true
+    tty: true
+
+  # One-shot command runner
+  raps-run:
+    image: dmytroyemelianov/raps:latest
+    environment:
+      - APS_CLIENT_ID=${APS_CLIENT_ID}
+      - APS_CLIENT_SECRET=${APS_CLIENT_SECRET}
+      - APS_REGION=${APS_REGION:-US}
+    volumes:
+      - ./data:/data
+      - ./pipelines:/pipelines
+    profiles:
+      - run
+
+  # Pipeline executor
+  raps-pipeline:
+    image: dmytroyemelianov/raps:latest
+    environment:
+      - APS_CLIENT_ID=${APS_CLIENT_ID}
+      - APS_CLIENT_SECRET=${APS_CLIENT_SECRET}
+      - APS_REGION=${APS_REGION:-US}
+    volumes:
+      - ./data:/data
+      - ./pipelines:/pipelines
+    command: ["pipeline", "run", "/pipelines/workflow.yaml"]
+    profiles:
+      - pipeline
+
