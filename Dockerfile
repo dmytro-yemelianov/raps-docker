@@ -1,3 +1,6 @@
+# 🌼 RAPS (rapeseed) — Rust Autodesk Platform Services CLI
+# https://rapscli.xyz
+
 FROM debian:bookworm-slim
 
 # Install runtime dependencies
