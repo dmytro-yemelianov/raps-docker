@@ -151,15 +151,15 @@ translate-model:
 
 | Architecture | Tag |
 |--------------|-----|
-| linux/amd64 | `latest`, `2.0.0` |
-| linux/arm64 | `latest`, `2.0.0` |
+| linux/amd64 | `latest`, `3.3.0` |
+| linux/arm64 | `latest`, `3.3.0` |
 
 ## Tags
 
 - `latest` — Latest stable release
-- `2.0.0` — Specific version
-- `2.0` — Latest patch of minor version
-- `2` — Latest minor of major version
+- `3.3.0` — Specific version
+- `3.3` — Latest patch of minor version
+- `3` — Latest minor of major version
 
 ## Environment Variables
 
@@ -178,12 +178,12 @@ git clone https://github.com/dmytro-yemelianov/raps-docker.git
 cd raps-docker
 
 # Build for current platform
-docker build -t raps:local --build-arg VERSION=2.0.0 .
+docker build -t raps:local --build-arg VERSION=3.3.0 .
 
 # Build multi-platform
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -t dmytroyemelianov/raps:2.0.0 \
-  --build-arg VERSION=2.0.0 \
+  -t dmytroyemelianov/raps:3.3.0 \
+  --build-arg VERSION=3.3.0 \
   --push .
 ```
 
