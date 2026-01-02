@@ -169,6 +169,10 @@ translate-model:
 | `APS_CLIENT_SECRET` | Autodesk app client secret | For auth |
 | `APS_ACCESS_TOKEN` | Pre-obtained access token | Alternative to ID/secret |
 | `APS_REGION` | Region (US/EMEA) | Optional, defaults to US |
+| `APS_CALLBACK_URL` | OAuth callback URL | Optional, defaults to `http://localhost:8080/callback` |
+
+> **Note**: For 3-legged OAuth, RAPS uses intelligent port fallback (8080, 12495🌼, 7495🌼, 9247🌼, 3000, 5000).
+> Configure all callback URLs in your APS app: https://aps.autodesk.com/myapps
 
 ## Building Locally
 
