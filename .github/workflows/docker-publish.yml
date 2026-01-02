@@ -44,8 +44,10 @@ jobs:
             VERSION="${{ github.event.client_payload.version }}"
           else
             # Fetch latest from GitHub API
-            VERSION=$(curl -s "https://api.github.com/repos/${{ env.RAPS_REPO }}/releases/latest" | jq -r '.tag_name' | sed 's/^v//')
+            VERSION=$(curl -s "https://api.github.com/repos/${{ env.RAPS_REPO }}/releases/latest" | jq -r '.tag_name')
           fi
+          # Always strip 'v' prefix if present
+          VERSION="${VERSION#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "🌼 Building RAPS version: $VERSION"
 
