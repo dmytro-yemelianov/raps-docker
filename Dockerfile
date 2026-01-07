@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean
 
 # Set version as an argument
-ARG VERSION=3.4.0
+ARG VERSION=3.7.0
 ARG TARGETARCH
 
 # Map Docker's TARGETARCH to RAPS release naming

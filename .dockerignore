@@ -1,0 +1,42 @@
+# Build artifacts
+target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.pem
+*.key
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+specs/
+
+# Test coverage
+coverage/
+*.gcda
+*.gcno
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
