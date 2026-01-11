@@ -17,23 +17,25 @@ LABEL org.opencontainers.image.licenses="Apache-2.0"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
 # Set version as an argument
-ARG VERSION=3.7.0
+ARG VERSION=3.9.0
 ARG TARGETARCH
 
-# Map Docker's TARGETARCH to RAPS release naming
+# Map Docker's TARGETARCH to cargo-dist naming convention
 RUN ARCH=$(case "${TARGETARCH}" in \
-        "amd64") echo "x64" ;; \
-        "arm64") echo "arm64" ;; \
-        *) echo "x64" ;; \
+        "amd64") echo "x86_64-unknown-linux-gnu" ;; \
+        "arm64") echo "aarch64-unknown-linux-gnu" ;; \
+        *) echo "x86_64-unknown-linux-gnu" ;; \
     esac) && \
-    curl -fsSL -o raps.tar.gz "https://github.com/dmytro-yemelianov/raps/releases/download/v${VERSION}/raps-linux-${ARCH}.tar.gz" && \
-    tar -xzf raps.tar.gz -C /usr/local/bin/ && \
+    curl -fsSL -o raps.tar.xz "https://github.com/dmytro-yemelianov/raps/releases/download/v${VERSION}/raps-cli-${ARCH}.tar.xz" && \
+    tar -xJf raps.tar.xz -C /usr/local/bin/ && \
+    mv /usr/local/bin/raps-cli /usr/local/bin/raps && \
     chmod +x /usr/local/bin/raps && \
-    rm raps.tar.gz
+    rm raps.tar.xz
 
 # Create non-root user for security
 RUN useradd -m -s /bin/bash raps
