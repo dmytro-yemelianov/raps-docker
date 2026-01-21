@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean
 
 # Set version as an argument
-ARG VERSION=3.9.0
+ARG VERSION=4.3.0
 ARG TARGETARCH
 
 # Map Docker's TARGETARCH to cargo-dist naming convention and download/install
