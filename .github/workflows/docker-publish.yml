@@ -134,3 +134,50 @@ jobs:
           else
             echo "- **Status:** ✅ Built and pushed" >> $GITHUB_STEP_SUMMARY
           fi
+
+  # Test Docker installation after build
+  test-docker:
+    name: Test Docker Installation
+    needs: check-and-build
+    if: ${{ always() && needs.check-and-build.result == 'success' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        registry:
+          - docker.io/dmytroyemelianov/raps
+          - ghcr.io/dmytro-yemelianov/raps
+    steps:
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(curl -s "https://api.github.com/repos/${{ env.RAPS_REPO }}/releases/latest" | jq -r '.tag_name' | sed 's/^v//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Pull and test Docker image
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          IMAGE="${{ matrix.registry }}:${VERSION}"
+
+          echo "🐳 Pulling $IMAGE..."
+          docker pull "$IMAGE"
+
+          echo "🧪 Testing raps --version..."
+          docker run --rm "$IMAGE" --version
+
+          echo "🧪 Testing raps --help..."
+          docker run --rm "$IMAGE" --help
+
+          echo "✅ Docker installation test passed for $IMAGE"
+
+      - name: Test Docker image (latest tag)
+        run: |
+          IMAGE="${{ matrix.registry }}:latest"
+
+          echo "🐳 Pulling $IMAGE..."
+          docker pull "$IMAGE"
+
+          echo "🧪 Testing raps --version..."
+          docker run --rm "$IMAGE" --version
+
+          echo "✅ Docker latest tag test passed"
