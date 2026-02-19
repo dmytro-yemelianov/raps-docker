@@ -1,0 +1,51 @@
+# raps-mock — Mock APS API server with baked-in OpenAPI specs
+# Multi-stage build: compile from source, copy binary + specs to slim runtime
+
+# ── Stage 1: Build ──────────────────────────────────────────────
+FROM rust:1.88-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git ca-certificates pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG MOCK_REF=main
+ARG OPENAPI_REF=main
+
+WORKDIR /build
+
+# Clone raps-mock and aps-sdk-openapi at pinned refs
+RUN git clone --depth 1 --branch ${MOCK_REF} \
+        https://github.com/dmytro-yemelianov/raps-mock.git && \
+    git clone --depth 1 --branch ${OPENAPI_REF} \
+        https://github.com/autodesk-platform-services/aps-sdk-openapi.git
+
+WORKDIR /build/raps-mock
+RUN cargo build --release
+
+# ── Stage 2: Runtime ────────────────────────────────────────────
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy binary
+COPY --from=builder /build/raps-mock/target/release/raps-mock /usr/local/bin/raps-mock
+
+# Copy OpenAPI specs
+COPY --from=builder /build/aps-sdk-openapi /opt/openapi
+
+# Copy entrypoint
+COPY entrypoint-mock.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Non-root user
+RUN useradd -m -s /bin/bash mock
+USER mock
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=5s --timeout=3s --retries=15 --start-period=10s \
+    CMD curl -sf http://localhost:3000/health || exit 1
+
+ENTRYPOINT ["/entrypoint.sh"]

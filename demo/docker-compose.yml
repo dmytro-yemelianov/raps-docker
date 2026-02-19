@@ -1,0 +1,51 @@
+# RAPS Demo Environment — mock API + CLI + test suite
+# Usage:
+#   docker compose up -d              # Start mock + CLI shell
+#   docker compose exec cli bash      # Interactive CLI
+#   docker compose --profile test up --exit-code-from examples  # Run tests
+
+services:
+  mock:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    ports:
+      - "${MOCK_PORT:-3000}:3000"
+    environment:
+      MOCK_PORT: "3000"
+      MOCK_MODE: "stateful"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  cli:
+    image: dmytroyemelianov/raps:${RAPS_VERSION:-latest}
+    environment:
+      APS_BASE_URL: http://mock:3000
+      APS_CLIENT_ID: ${APS_CLIENT_ID:-mock-client-id}
+      APS_CLIENT_SECRET: ${APS_CLIENT_SECRET:-mock-client-secret}
+    depends_on:
+      mock:
+        condition: service_healthy
+    entrypoint: ["/bin/bash"]
+    stdin_open: true
+    tty: true
+
+  examples:
+    build:
+      context: .
+      dockerfile: Dockerfile.examples
+    environment:
+      APS_BASE_URL: http://mock:3000
+      APS_CLIENT_ID: ${APS_CLIENT_ID:-mock-client-id}
+      APS_CLIENT_SECRET: ${APS_CLIENT_SECRET:-mock-client-secret}
+    volumes:
+      - ./recordings:/app/recordings
+    depends_on:
+      mock:
+        condition: service_healthy
+    profiles:
+      - test

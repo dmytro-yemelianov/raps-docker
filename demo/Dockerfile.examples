@@ -1,0 +1,55 @@
+# raps-examples — Python test suite that validates raps CLI against mock server
+# Multi-stage build: compile yr, extract raps binary, install Python test deps
+
+ARG RAPS_VERSION=latest
+
+# ── Stage 1: Extract raps binary ────────────────────────────────
+FROM dmytroyemelianov/raps:${RAPS_VERSION} AS raps-bin
+
+# ── Stage 2: Build yr from source ───────────────────────────────
+FROM rust:1.88-slim AS yr-builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git ca-certificates pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG YR_REF=main
+
+WORKDIR /build
+RUN git clone --depth 1 --branch ${YR_REF} \
+        https://github.com/dmytro-yemelianov/yr.git
+
+WORKDIR /build/yr
+RUN cargo build --release
+
+# ── Stage 3: Test runner ────────────────────────────────────────
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG EXAMPLES_REF=main
+
+# Copy raps binary from published image
+COPY --from=raps-bin /usr/local/bin/raps /usr/local/bin/raps
+RUN chmod +x /usr/local/bin/raps
+
+# Copy yr binary from builder
+COPY --from=yr-builder /build/yr/target/release/yr /usr/local/bin/yr
+RUN chmod +x /usr/local/bin/yr
+
+# Clone raps-examples
+WORKDIR /app
+RUN git clone --depth 1 --branch ${EXAMPLES_REF} \
+        https://github.com/dmytro-yemelianov/raps-examples.git .
+
+# Install test dependencies
+RUN pip install --no-cache-dir -e ".[test]"
+
+# Copy entrypoint scripts
+COPY entrypoint-examples.sh /entrypoint.sh
+COPY wait-for-mock.sh /wait-for-mock.sh
+RUN chmod +x /entrypoint.sh /wait-for-mock.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
