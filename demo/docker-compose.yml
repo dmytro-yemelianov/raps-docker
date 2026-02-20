@@ -27,8 +27,8 @@ services:
       dockerfile: Dockerfile.raps
     environment:
       APS_BASE_URL: http://mock:3000
-      APS_CLIENT_ID: ${APS_CLIENT_ID:-mock-client-id}
-      APS_CLIENT_SECRET: ${APS_CLIENT_SECRET:-mock-client-secret}
+      APS_CLIENT_ID: mock-client-id
+      APS_CLIENT_SECRET: mock-client-secret
       RAPS_USE_FILE_STORAGE: "1"
     depends_on:
       mock:
@@ -43,8 +43,8 @@ services:
       dockerfile: Dockerfile.examples
     environment:
       APS_BASE_URL: http://mock:3000
-      APS_CLIENT_ID: ${APS_CLIENT_ID:-mock-client-id}
-      APS_CLIENT_SECRET: ${APS_CLIENT_SECRET:-mock-client-secret}
+      APS_CLIENT_ID: mock-client-id
+      APS_CLIENT_SECRET: mock-client-secret
       RAPS_USE_FILE_STORAGE: "1"
     volumes:
       - ./recordings:/app/recordings
