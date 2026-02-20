@@ -1,10 +1,21 @@
 # raps-examples — Python test suite that validates raps CLI against mock server
-# Multi-stage build: extract raps binary, install Python test deps
+# Multi-stage build: compile raps from source, install Python test deps
 
-ARG RAPS_VERSION=latest
+# ── Stage 1: Build raps from source ─────────────────────────────
+FROM rust:1.88-slim AS raps-builder
 
-# ── Stage 1: Extract raps binary ────────────────────────────────
-FROM dmytroyemelianov/raps:${RAPS_VERSION} AS raps-bin
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git ca-certificates pkg-config libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG RAPS_REF=main
+
+WORKDIR /build
+RUN git clone --depth 1 --branch ${RAPS_REF} \
+        https://github.com/dmytro-yemelianov/raps.git
+
+WORKDIR /build/raps
+RUN cargo build --release -p raps-cli
 
 # ── Stage 2: Test runner ──────────────────────────────────────
 FROM python:3.12-slim
@@ -15,8 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ARG EXAMPLES_REF=master
 
-# Copy raps binary from published image
-COPY --from=raps-bin /usr/local/bin/raps /usr/local/bin/raps
+# Copy raps binary built from source
+COPY --from=raps-builder /build/raps/target/release/raps /usr/local/bin/raps
 RUN chmod +x /usr/local/bin/raps
 
 # Clone raps-examples

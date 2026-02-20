@@ -1,0 +1,33 @@
+# raps CLI — built from source for demo environment
+# Multi-stage build: compile from GitHub main branch, slim runtime
+
+# ── Stage 1: Build ──────────────────────────────────────────────
+FROM rust:1.88-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git ca-certificates pkg-config libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG RAPS_REF=main
+
+WORKDIR /build
+
+# Clone raps and build the CLI crate only
+RUN git clone --depth 1 --branch ${RAPS_REF} \
+        https://github.com/dmytro-yemelianov/raps.git
+
+WORKDIR /build/raps
+RUN cargo build --release -p raps-cli
+
+# ── Stage 2: Runtime ────────────────────────────────────────────
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy raps binary
+COPY --from=builder /build/raps/target/release/raps /usr/local/bin/raps
+RUN chmod +x /usr/local/bin/raps
+
+ENTRYPOINT ["/bin/bash"]

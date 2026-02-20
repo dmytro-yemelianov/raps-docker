@@ -22,7 +22,9 @@ services:
       start_period: 10s
 
   cli:
-    image: dmytroyemelianov/raps:${RAPS_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.raps
     environment:
       APS_BASE_URL: http://mock:3000
       APS_CLIENT_ID: ${APS_CLIENT_ID:-mock-client-id}
