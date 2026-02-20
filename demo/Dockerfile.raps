@@ -30,4 +30,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /build/raps/target/release/raps /usr/local/bin/raps
 RUN chmod +x /usr/local/bin/raps
 
-ENTRYPOINT ["/bin/bash"]
+# Copy helper scripts
+COPY entrypoint-cli.sh /entrypoint-cli.sh
+COPY wait-for-mock.sh /wait-for-mock.sh
+RUN chmod +x /entrypoint-cli.sh /wait-for-mock.sh
+
+ENTRYPOINT ["/entrypoint-cli.sh"]
