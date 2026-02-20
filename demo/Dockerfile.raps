@@ -33,6 +33,7 @@ RUN chmod +x /usr/local/bin/raps
 # Copy helper scripts
 COPY entrypoint-cli.sh /entrypoint-cli.sh
 COPY wait-for-mock.sh /wait-for-mock.sh
-RUN chmod +x /entrypoint-cli.sh /wait-for-mock.sh
+RUN sed -i 's/\r$//' /entrypoint-cli.sh /wait-for-mock.sh && \
+    chmod +x /entrypoint-cli.sh /wait-for-mock.sh
 
 ENTRYPOINT ["/entrypoint-cli.sh"]

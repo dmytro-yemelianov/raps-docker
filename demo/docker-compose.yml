@@ -33,7 +33,6 @@ services:
     depends_on:
       mock:
         condition: service_healthy
-    entrypoint: ["/bin/bash"]
     stdin_open: true
     tty: true
 
